@@ -1,34 +1,33 @@
-import { z } from 'zod';
+import { z } from "zod/v4";
 
-// Schema for blog post parameters
-export const BlogPostParamsSchema = z.object({
-  slug: z.string().describe('The unique slug identifier for the blog post'),
-});
-
-// Schema for blog post content
+// Schema for a single blog post (without content)
 export const BlogPostSchema = z.object({
-  slug: z.string(),
   title: z.string(),
+  slug: z.string(),
+  date: z.string(),
+  updated: z.string().optional(),
+  tags: z.array(z.string()),
+  description: z.string(),
+  href: z.string().optional(),
+});
+
+// Schema for a full blog post (with content)
+export const BlogPostWithContentSchema = BlogPostSchema.extend({
   content: z.string(),
-  date: z.string().datetime(),
+  draft: z.boolean(),
 });
 
-// Schema for blog list parameters (pagination)
-export const BlogListParamsSchema = z.object({
-  page: z.number().int().min(1).default(1).describe('Page number'),
-  limit: z.number().int().min(1).max(50).default(10).describe('Items per page'),
+// Schema for paginated blogs response
+export const BlogsResponseSchema = z.object({
+  posts: z.array(BlogPostSchema),
+  pagination: z.object({
+    page: z.number(),
+    limit: z.number(),
+    totalPosts: z.number(),
+    totalPages: z.number(),
+  }),
 });
 
-// Schema for paginated blog list response
-export const BlogListSchema = z.object({
-  items: z.array(BlogPostSchema),
-  total: z.number().int(),
-  page: z.number().int(),
-  totalPages: z.number().int(),
-});
-
-// Type definitions
-export type BlogPostParams = z.infer<typeof BlogPostParamsSchema>;
 export type BlogPost = z.infer<typeof BlogPostSchema>;
-export type BlogListParams = z.infer<typeof BlogListParamsSchema>;
-export type BlogList = z.infer<typeof BlogListSchema>;
+export type BlogPostWithContent = z.infer<typeof BlogPostWithContentSchema>;
+export type BlogsResponse = z.infer<typeof BlogsResponseSchema>;

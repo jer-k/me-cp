@@ -1,47 +1,32 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { McpAgent } from "agents/mcp";
+import { Hono } from "hono";
 
-// Import all resources
-import { BlogPostResource } from '@/resources/blogPost';
-import { BlogListResource } from '@/resources/blogList';
-import { CVResource } from '@/resources/cv';
-import { JobsResource } from '@/resources/jobs';
+import { registerGetAbout } from "./tools/get-about";
+import { registerGetBlog } from "./tools/get-blog";
+import { registerGetBlogs } from "./tools/get-blogs";
+import { registerGetCv } from "./tools/get-cv";
+import { registerGetCvJobs } from "./tools/get-cv-jobs";
 
-// Initialize the server with metadata
-const server = new Server(
-  {
-    name: 'me-cp-server',
-    version: '1.0.0',
-    description: 'MCP server providing access to personal information, blog posts, and CV data',
-  },
-  {
-    capabilities: {
-      resources: {
-        // Blog-related resources
-        blogPost: new BlogPostResource(),
-        blogList: new BlogListResource(),
-        
-        // CV-related resources
-        cv: new CVResource(),
-        jobs: new JobsResource(),
-      },
-      // We'll implement tools later
-      tools: {},
-    },
-  },
-);
+export class MeCP extends McpAgent<Env, Record<string, never>, Record<string, unknown>> {
+  server = new McpServer({
+    name: "Me-CP",
+    version: "0.0.1",
+  });
 
-// Add error handling for uncaught exceptions
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught Exception:', error);
-  process.exit(1);
-});
+  async init() {
+    registerGetAbout(this.server, this.env);
+    registerGetBlogs(this.server, this.env);
+    registerGetBlog(this.server, this.env);
+    registerGetCv(this.server, this.env);
+    registerGetCvJobs(this.server, this.env);
+  }
+}
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
-});
+const app = new Hono<{ Bindings: Env }>();
 
-// Start the server with stdio transport
-const transport = new StdioServerTransport();
-server.listen(transport);
+app.all("/mcp", (c) => MeCP.serve("/mcp").fetch(c.req.raw, c.env, c.executionCtx));
+
+app.notFound((c) => c.text("Not found", 404));
+
+export default app;

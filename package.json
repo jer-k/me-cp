@@ -1,33 +1,28 @@
 {
-  "name": "me-cp-server",
-  "description": "An MCP server about me",
-  "version": "1.0.0",
-  "type": "module",
-  "bin": {
-    "mcp-server": "./build/index.js"
-  },
-  "files": [
-    "build"
-  ],
+  "name": "me-cp",
+  "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "build": "tsc && tsc-alias && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
-    "prepare": "npm run build",
-    "watch": "tsc --watch",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "format": "biome format --write",
+    "lint:fix": "biome lint --fix",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types",
+    "type-check": "tsc --noEmit",
+    "test": "vitest"
   },
-  "keywords": [],
-  "author": "Jeremy Kreutzbender",
-  "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.2",
-    "axios": "^1.9.0",
-    "dotenv": "^16.5.0",
-    "zod": "^3.24.3"
+    "@modelcontextprotocol/sdk": "1.20.2",
+    "agents": "^0.2.19",
+    "hono": "^4.10.5",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "^22.15.2",
-    "tsc-alias": "^1.8.15",
-    "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.8.3"
+    "@biomejs/biome": "^2.3.2",
+    "@types/node": "^24.10.0",
+    "typescript": "5.9.3",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.45.2"
   }
 }

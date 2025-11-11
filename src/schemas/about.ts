@@ -1,16 +1,9 @@
-import { z } from 'zod';
+import { z } from "zod/v4";
 
-export const AboutSchema = z.object({
+export const AboutResponseSchema = z.object({
   name: z.string(),
-  bio: z.string(),
-  skills: z.array(z.string()),
-  interests: z.array(z.string()),
-  socialLinks: z.array(
-    z.object({
-      platform: z.string(),
-      url: z.string().url(),
-    })
-  ).optional(),
+  email: z.string(),
+  website: z.string(),
 });
 
-export type About = z.infer<typeof AboutSchema>;
+export type AboutResponse = z.infer<typeof AboutResponseSchema>;
