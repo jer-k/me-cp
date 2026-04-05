@@ -20,7 +20,7 @@ describe("get-cv-jobs tool", () => {
     toolHandler = vi.fn();
 
     mockServer = {
-      tool: vi.fn((_name: string, _description: string, _schema: any, handler: any) => {
+      registerTool: vi.fn((_name: string, _config: any, handler: any) => {
         toolHandler = handler;
       }),
     };
@@ -29,11 +29,12 @@ describe("get-cv-jobs tool", () => {
   it("should register the tool with correct name and description", () => {
     registerGetCvJobs(mockServer, mockEnv);
 
-    expect(mockServer.tool).toHaveBeenCalledWith(
+    expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-cv-jobs",
-      expect.stringContaining("Fetch only the work experience/jobs section"),
-      {},
-      expect.any(Function),
+      {
+        description: expect.stringContaining("Fetch only the work experience/jobs section"),
+      },
+      expect.any(Function)
     );
   });
 
@@ -57,14 +58,17 @@ describe("get-cv-jobs tool", () => {
     ];
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: mockGet,
-    }) as any);
+    vi.mocked(ApiClient).mockImplementation(
+      () =>
+        ({
+          get: mockGet,
+        }) as any
+    );
 
     registerGetCvJobs(mockServer, mockEnv);
     const result = await toolHandler();
 
-    expect(mockGet).toHaveBeenCalledWith("/api/cv/jobs", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/cv/jobs", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
@@ -80,14 +84,17 @@ describe("get-cv-jobs tool", () => {
     const mockError = new Error("API request failed: 403 Forbidden");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: mockGet,
-    }) as any);
+    vi.mocked(ApiClient).mockImplementation(
+      () =>
+        ({
+          get: mockGet,
+        }) as any
+    );
 
     registerGetCvJobs(mockServer, mockEnv);
     const result = await toolHandler();
 
-    expect(mockGet).toHaveBeenCalledWith("/api/cv/jobs", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/cv/jobs", expect.any(Object));
     expect(result).toEqual({
       content: [
         {

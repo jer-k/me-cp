@@ -1,4 +1,4 @@
-import { z } from "zod/v4";
+import { z } from "zod";
 
 // Schema for a single blog post (without content)
 export const BlogPostSchema = z.object({

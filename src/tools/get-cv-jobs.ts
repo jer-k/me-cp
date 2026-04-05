@@ -6,13 +6,15 @@ import { JobsResponseSchema } from "../schemas/cv";
 export function registerGetCvJobs(server: McpServer, env: Env) {
   const client = new ApiClient(env.API_BASE_URL, env.API_SECRET_KEY);
 
-  server.tool(
+  server.registerTool(
     "get-cv-jobs",
-    "Fetch only the work experience/jobs section from Jeremy Kreutzbender's CV. Returns a list of positions with company names, titles, durations, and detailed descriptions.",
-    {},
+    {
+      description:
+        "Fetch only the work experience/jobs section from Jeremy Kreutzbender's CV. Returns a list of positions with company names, titles, durations, and detailed descriptions.",
+    },
     async () => {
       try {
-        const data = await client.get("/api/cv/jobs", JobsResponseSchema);
+        const data = await client.get("/cv/jobs", JobsResponseSchema);
 
         return {
           content: [

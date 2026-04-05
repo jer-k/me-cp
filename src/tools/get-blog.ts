@@ -1,5 +1,5 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import { ApiClient } from "../lib/api-client";
 import { BlogPostWithContentSchema } from "../schemas/blog";
@@ -7,19 +7,22 @@ import { BlogPostWithContentSchema } from "../schemas/blog";
 export function registerGetBlog(server: McpServer, env: Env) {
   const client = new ApiClient(env.API_BASE_URL, env.API_SECRET_KEY);
 
-  server.tool(
+  server.registerTool(
     "get-blog",
-    "Fetch a single blog post by its slug from jeremykreutzbender.com. Returns the full blog post including content in markdown format.",
     {
-      slug: z
-        .string()
-        .describe(
-          "The URL slug of the blog post to fetch (e.g., 'building-a-blog-with-app-router-rsc-tailwind')."
-        ),
+      description:
+        "Fetch a single blog post by its slug from jeremykreutzbender.com. Returns the full blog post including content in markdown format.",
+      inputSchema: {
+        slug: z
+          .string()
+          .describe(
+            "The URL slug of the blog post to fetch (e.g., 'building-a-blog-with-app-router-rsc-tailwind')."
+          ),
+      },
     },
     async ({ slug }) => {
       try {
-        const data = await client.get(`/api/blogs/${slug}`, BlogPostWithContentSchema);
+        const data = await client.get(`/blogs/${slug}`, BlogPostWithContentSchema);
 
         return {
           content: [

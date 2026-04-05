@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { z } from "zod/v4";
+import { z } from "zod";
 import { ApiClient } from "../../src/lib/api-client";
 
 describe("ApiClient", () => {
@@ -34,7 +34,6 @@ describe("ApiClient", () => {
         method: "GET",
         headers: {
           authorization: `Bearer ${apiKey}`,
-          "content-type": "application/json",
         },
       });
       expect(result).toEqual(mockData);
@@ -51,14 +50,13 @@ describe("ApiClient", () => {
       global.fetch = vi.fn().mockResolvedValue(mockResponse);
 
       await expect(apiClient.get("/users/999", testSchema)).rejects.toThrow(
-        "API request failed: 404 Not Found",
+        "API request failed: 404 Not Found"
       );
 
       expect(fetch).toHaveBeenCalledWith(`${baseUrl}/users/999`, {
         method: "GET",
         headers: {
           authorization: `Bearer ${apiKey}`,
-          "content-type": "application/json",
         },
       });
     });
