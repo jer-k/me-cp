@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClient } from "../../src/lib/api-client";
-import { registerGetBlogs } from "../../src/tools/get-blogs";
+import { registerGetOpenSource } from "../../src/tools/get-open-source";
 
 vi.mock("../../src/lib/api-client");
 
-describe("get-blogs tool", () => {
+describe("get-open-source tool", () => {
   let mockServer: any;
   let mockEnv: any;
   let toolHandler: any;
@@ -27,40 +27,38 @@ describe("get-blogs tool", () => {
   });
 
   it("should register the tool with correct name and description", () => {
-    registerGetBlogs(mockServer, mockEnv);
+    registerGetOpenSource(mockServer, mockEnv);
 
     expect(mockServer.registerTool).toHaveBeenCalledWith(
-      "get-blogs",
+      "get-open-source",
       expect.objectContaining({
-        description: expect.stringContaining("Fetch a paginated list of blog posts"),
+        description: expect.stringContaining("open source pull requests"),
         inputSchema: expect.any(Object),
       }),
       expect.any(Function)
     );
   });
 
-  it("should return JSON blog list with mimeType when API call succeeds with default parameters", async () => {
+  it("should return JSON pull request data with default parameters", async () => {
     const mockData = {
-      posts: [
+      pullRequests: [
         {
-          title: "First Post",
-          slug: "first-post",
-          date: "2024-01-01",
-          tags: ["typescript"],
-          description: "First post description",
-        },
-        {
-          title: "Second Post",
-          slug: "second-post",
-          date: "2024-01-02",
-          tags: ["testing"],
-          description: "Second post description",
+          createdAt: "2024-01-15T10:00:00Z",
+          number: 42,
+          title: "Fix typo in README",
+          permalink: "https://github.com/some-org/some-repo/pull/42",
+          repository: {
+            name: "some-repo",
+            nameWithOwner: "some-org/some-repo",
+            url: "https://github.com/some-org/some-repo",
+            owner: { login: "some-org" },
+          },
         },
       ],
       pagination: {
         page: 1,
         limit: 100,
-        totalPosts: 2,
+        total: 1,
         totalPages: 1,
       },
     };
@@ -73,10 +71,10 @@ describe("get-blogs tool", () => {
         }) as any
     );
 
-    registerGetBlogs(mockServer, mockEnv);
+    registerGetOpenSource(mockServer, mockEnv);
     const result = await toolHandler({ page: 1, limit: 100 });
 
-    expect(mockGet).toHaveBeenCalledWith("/blogs?page=1&limit=100", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/open-source?page=1&limit=100", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
@@ -88,23 +86,10 @@ describe("get-blogs tool", () => {
     });
   });
 
-  it("should return JSON blog list with mimeType with custom pagination parameters", async () => {
+  it("should support custom pagination parameters", async () => {
     const mockData = {
-      posts: [
-        {
-          title: "Post on Page 2",
-          slug: "post-page-2",
-          date: "2024-01-03",
-          tags: ["vitest"],
-          description: "A post on page 2",
-        },
-      ],
-      pagination: {
-        page: 2,
-        limit: 10,
-        totalPosts: 15,
-        totalPages: 2,
-      },
+      pullRequests: [],
+      pagination: { page: 2, limit: 10, total: 15, totalPages: 2 },
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
@@ -115,19 +100,10 @@ describe("get-blogs tool", () => {
         }) as any
     );
 
-    registerGetBlogs(mockServer, mockEnv);
-    const result = await toolHandler({ page: 2, limit: 10 });
+    registerGetOpenSource(mockServer, mockEnv);
+    await toolHandler({ page: 2, limit: 10 });
 
-    expect(mockGet).toHaveBeenCalledWith("/blogs?page=2&limit=10", expect.any(Object));
-    expect(result).toEqual({
-      content: [
-        {
-          type: "text",
-          text: JSON.stringify(mockData, null, 2),
-          mimeType: "application/json",
-        },
-      ],
-    });
+    expect(mockGet).toHaveBeenCalledWith("/open-source?page=2&limit=10", expect.any(Object));
   });
 
   it("should return error response when API call fails", async () => {
@@ -141,15 +117,14 @@ describe("get-blogs tool", () => {
         }) as any
     );
 
-    registerGetBlogs(mockServer, mockEnv);
+    registerGetOpenSource(mockServer, mockEnv);
     const result = await toolHandler({ page: 1, limit: 100 });
 
-    expect(mockGet).toHaveBeenCalledWith("/blogs?page=1&limit=100", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
           type: "text",
-          text: "Error fetching blogs: API request failed: 500 Internal Server Error",
+          text: "Error fetching open source contributions: API request failed: 500 Internal Server Error",
         },
       ],
       isError: true,

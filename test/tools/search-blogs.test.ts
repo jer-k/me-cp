@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClient } from "../../src/lib/api-client";
-import { registerGetBlog } from "../../src/tools/get-blog";
+import { registerSearchBlogs } from "../../src/tools/search-blogs";
 
 vi.mock("../../src/lib/api-client");
 
-describe("get-blog tool", () => {
+describe("search-blogs tool", () => {
   let mockServer: any;
   let mockEnv: any;
   let toolHandler: any;
@@ -27,27 +27,31 @@ describe("get-blog tool", () => {
   });
 
   it("should register the tool with correct name and description", () => {
-    registerGetBlog(mockServer, mockEnv);
+    registerSearchBlogs(mockServer, mockEnv);
 
     expect(mockServer.registerTool).toHaveBeenCalledWith(
-      "get-blog",
+      "search-blogs",
       expect.objectContaining({
-        description: expect.stringContaining("Fetch a single blog post by its slug"),
+        description: expect.stringContaining("Search blog posts"),
         inputSchema: expect.any(Object),
       }),
       expect.any(Function)
     );
   });
 
-  it("should return JSON blog post with mimeType when API call succeeds", async () => {
+  it("should return JSON search results when API call succeeds", async () => {
     const mockData = {
-      title: "My Blog Post",
-      slug: "my-blog-post",
-      date: "2024-01-01",
-      tags: ["typescript", "testing"],
-      description: "A test blog post",
-      content: "# Blog Content\n\nThis is the content.",
-      draft: false,
+      query: "docker",
+      posts: [
+        {
+          title: "Docker Guide",
+          slug: "docker-guide",
+          date: "2024-01-01",
+          tags: ["docker"],
+          description: "A guide to Docker",
+        },
+      ],
+      total: 1,
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
@@ -58,10 +62,10 @@ describe("get-blog tool", () => {
         }) as any
     );
 
-    registerGetBlog(mockServer, mockEnv);
-    const result = await toolHandler({ slug: "my-blog-post" });
+    registerSearchBlogs(mockServer, mockEnv);
+    const result = await toolHandler({ query: "docker" });
 
-    expect(mockGet).toHaveBeenCalledWith("/blogs/my-blog-post", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/blogs/search?q=docker", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
@@ -73,8 +77,25 @@ describe("get-blog tool", () => {
     });
   });
 
+  it("should URL-encode the query parameter", async () => {
+    const mockData = { query: "getting started", posts: [], total: 0 };
+
+    const mockGet = vi.fn().mockResolvedValue(mockData);
+    vi.mocked(ApiClient).mockImplementation(
+      () =>
+        ({
+          get: mockGet,
+        }) as any
+    );
+
+    registerSearchBlogs(mockServer, mockEnv);
+    await toolHandler({ query: "getting started" });
+
+    expect(mockGet).toHaveBeenCalledWith("/blogs/search?q=getting%20started", expect.any(Object));
+  });
+
   it("should return error response when API call fails", async () => {
-    const mockError = new Error("API request failed: 404 Not Found");
+    const mockError = new Error("API request failed: 500 Internal Server Error");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
     vi.mocked(ApiClient).mockImplementation(
@@ -84,15 +105,14 @@ describe("get-blog tool", () => {
         }) as any
     );
 
-    registerGetBlog(mockServer, mockEnv);
-    const result = await toolHandler({ slug: "non-existent-post" });
+    registerSearchBlogs(mockServer, mockEnv);
+    const result = await toolHandler({ query: "docker" });
 
-    expect(mockGet).toHaveBeenCalledWith("/blogs/non-existent-post", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
           type: "text",
-          text: "Error fetching blog post: API request failed: 404 Not Found",
+          text: "Error searching blogs: API request failed: 500 Internal Server Error",
         },
       ],
       isError: true,
