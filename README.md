@@ -11,6 +11,14 @@ will ever use this, but I built it as fun little project to gather data from my 
 - **get-cv-jobs** — Fetch only the work experience/jobs section from the CV
 - **get-blogs** — Fetch a paginated list of blog posts (metadata only)
 - **get-blog** — Fetch a single blog post by slug, including full markdown content
+- **get-blogs-by-tag** — Fetch blog posts filtered by a specific tag (case-insensitive)
+- **search-blogs** — Search blog posts by keyword across titles, descriptions, content, and tags
+- **get-tags** — Get all unique blog post tags, sorted alphabetically
+- **get-social-links** — Get social media links including GitHub, Twitter, and LinkedIn
+- **get-open-source** — Fetch a paginated list of open source pull request contributions
+- **get-search-stats-summary** — Get a Google Search Console summary with total clicks, impressions, average CTR, and position
+- **get-search-stats-top-pages** — Get the top performing pages ranked by clicks from Google Search Console
+- **get-search-stats-top-queries** — Get the top search queries driving traffic from Google Search Console
 
 ## Development
 

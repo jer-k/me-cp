@@ -28,6 +28,22 @@ export const BlogsResponseSchema = z.object({
   }),
 });
 
+// Schema for blogs by tag response
+export const BlogsByTagResponseSchema = z.object({
+  tag: z.string(),
+  posts: z.array(BlogPostSchema),
+  total: z.number(),
+});
+
+// Schema for blog search response
+export const BlogSearchResponseSchema = z.object({
+  query: z.string(),
+  posts: z.array(BlogPostSchema),
+  total: z.number(),
+});
+
 export type BlogPost = z.infer<typeof BlogPostSchema>;
 export type BlogPostWithContent = z.infer<typeof BlogPostWithContentSchema>;
 export type BlogsResponse = z.infer<typeof BlogsResponseSchema>;
+export type BlogsByTagResponse = z.infer<typeof BlogsByTagResponseSchema>;
+export type BlogSearchResponse = z.infer<typeof BlogSearchResponseSchema>;

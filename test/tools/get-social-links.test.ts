@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiClient } from "../../src/lib/api-client";
-import { registerGetBlog } from "../../src/tools/get-blog";
+import { registerGetSocialLinks } from "../../src/tools/get-social-links";
 
 vi.mock("../../src/lib/api-client");
 
-describe("get-blog tool", () => {
+describe("get-social-links tool", () => {
   let mockServer: any;
   let mockEnv: any;
   let toolHandler: any;
@@ -27,27 +27,25 @@ describe("get-blog tool", () => {
   });
 
   it("should register the tool with correct name and description", () => {
-    registerGetBlog(mockServer, mockEnv);
+    registerGetSocialLinks(mockServer, mockEnv);
 
     expect(mockServer.registerTool).toHaveBeenCalledWith(
-      "get-blog",
+      "get-social-links",
       expect.objectContaining({
-        description: expect.stringContaining("Fetch a single blog post by its slug"),
-        inputSchema: expect.any(Object),
+        description: expect.stringContaining("social media links"),
       }),
       expect.any(Function)
     );
   });
 
-  it("should return JSON blog post with mimeType when API call succeeds", async () => {
+  it("should return JSON social links data when API call succeeds", async () => {
     const mockData = {
-      title: "My Blog Post",
-      slug: "my-blog-post",
-      date: "2024-01-01",
-      tags: ["typescript", "testing"],
-      description: "A test blog post",
-      content: "# Blog Content\n\nThis is the content.",
-      draft: false,
+      github: {
+        profile: "https://github.com/jer-k",
+        repo: "https://github.com/jer-k/jeremykreutzbender.com",
+      },
+      twitter: "https://twitter.com/J_Kreutzbender",
+      linkedin: "https://www.linkedin.com/in/jeremykreutzbender/",
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
@@ -58,10 +56,10 @@ describe("get-blog tool", () => {
         }) as any
     );
 
-    registerGetBlog(mockServer, mockEnv);
-    const result = await toolHandler({ slug: "my-blog-post" });
+    registerGetSocialLinks(mockServer, mockEnv);
+    const result = await toolHandler();
 
-    expect(mockGet).toHaveBeenCalledWith("/blogs/my-blog-post", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/social-links", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
@@ -74,7 +72,7 @@ describe("get-blog tool", () => {
   });
 
   it("should return error response when API call fails", async () => {
-    const mockError = new Error("API request failed: 404 Not Found");
+    const mockError = new Error("API request failed: 500 Internal Server Error");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
     vi.mocked(ApiClient).mockImplementation(
@@ -84,15 +82,14 @@ describe("get-blog tool", () => {
         }) as any
     );
 
-    registerGetBlog(mockServer, mockEnv);
-    const result = await toolHandler({ slug: "non-existent-post" });
+    registerGetSocialLinks(mockServer, mockEnv);
+    const result = await toolHandler();
 
-    expect(mockGet).toHaveBeenCalledWith("/blogs/non-existent-post", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
           type: "text",
-          text: "Error fetching blog post: API request failed: 404 Not Found",
+          text: "Error fetching social links: API request failed: 500 Internal Server Error",
         },
       ],
       isError: true,

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { registerGetCv } from "../../src/tools/get-cv";
 import { ApiClient } from "../../src/lib/api-client";
+import { registerGetCv } from "../../src/tools/get-cv";
 
 vi.mock("../../src/lib/api-client");
 
