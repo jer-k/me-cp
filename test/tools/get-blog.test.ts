@@ -20,7 +20,7 @@ describe("get-blog tool", () => {
     toolHandler = vi.fn();
 
     mockServer = {
-      tool: vi.fn((_name: string, _description: string, _schema: any, handler: any) => {
+      registerTool: vi.fn((_name: string, _config: any, handler: any) => {
         toolHandler = handler;
       }),
     };
@@ -29,11 +29,13 @@ describe("get-blog tool", () => {
   it("should register the tool with correct name and description", () => {
     registerGetBlog(mockServer, mockEnv);
 
-    expect(mockServer.tool).toHaveBeenCalledWith(
+    expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-blog",
-      expect.stringContaining("Fetch a single blog post by its slug"),
-      expect.any(Object),
-      expect.any(Function),
+      expect.objectContaining({
+        description: expect.stringContaining("Fetch a single blog post by its slug"),
+        inputSchema: expect.any(Object),
+      }),
+      expect.any(Function)
     );
   });
 
@@ -49,14 +51,17 @@ describe("get-blog tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: mockGet,
-    }) as any);
+    vi.mocked(ApiClient).mockImplementation(
+      () =>
+        ({
+          get: mockGet,
+        }) as any
+    );
 
     registerGetBlog(mockServer, mockEnv);
     const result = await toolHandler({ slug: "my-blog-post" });
 
-    expect(mockGet).toHaveBeenCalledWith("/api/blogs/my-blog-post", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/blogs/my-blog-post", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
@@ -72,14 +77,17 @@ describe("get-blog tool", () => {
     const mockError = new Error("API request failed: 404 Not Found");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: mockGet,
-    }) as any);
+    vi.mocked(ApiClient).mockImplementation(
+      () =>
+        ({
+          get: mockGet,
+        }) as any
+    );
 
     registerGetBlog(mockServer, mockEnv);
     const result = await toolHandler({ slug: "non-existent-post" });
 
-    expect(mockGet).toHaveBeenCalledWith("/api/blogs/non-existent-post", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/blogs/non-existent-post", expect.any(Object));
     expect(result).toEqual({
       content: [
         {

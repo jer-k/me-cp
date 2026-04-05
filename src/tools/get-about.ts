@@ -6,13 +6,15 @@ import { AboutResponseSchema } from "../schemas/about";
 export function registerGetAbout(server: McpServer, env: Env) {
   const client = new ApiClient(env.API_BASE_URL, env.API_SECRET_KEY);
 
-  server.tool(
+  server.registerTool(
     "get-about",
-    "Get personal information about Jeremy Kreutzbender including name, email, and website.",
-    {},
+    {
+      description:
+        "Get personal information about Jeremy Kreutzbender including name, email, and website.",
+    },
     async () => {
       try {
-        const data = await client.get("/api/about", AboutResponseSchema);
+        const data = await client.get("/about", AboutResponseSchema);
 
         return {
           content: [

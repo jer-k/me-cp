@@ -1,4 +1,4 @@
-import type { z } from "zod/v4";
+import type { z } from "zod";
 
 export class ApiClient {
   private baseUrl: string;
@@ -16,7 +16,6 @@ export class ApiClient {
       method: "GET",
       headers: {
         authorization: `Bearer ${this.apiKey}`,
-        "content-type": "application/json",
       },
     });
 

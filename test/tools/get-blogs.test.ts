@@ -20,7 +20,7 @@ describe("get-blogs tool", () => {
     toolHandler = vi.fn();
 
     mockServer = {
-      tool: vi.fn((_name: string, _description: string, _schema: any, handler: any) => {
+      registerTool: vi.fn((_name: string, _config: any, handler: any) => {
         toolHandler = handler;
       }),
     };
@@ -29,11 +29,13 @@ describe("get-blogs tool", () => {
   it("should register the tool with correct name and description", () => {
     registerGetBlogs(mockServer, mockEnv);
 
-    expect(mockServer.tool).toHaveBeenCalledWith(
+    expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-blogs",
-      expect.stringContaining("Fetch a paginated list of blog posts"),
-      expect.any(Object),
-      expect.any(Function),
+      expect.objectContaining({
+        description: expect.stringContaining("Fetch a paginated list of blog posts"),
+        inputSchema: expect.any(Object),
+      }),
+      expect.any(Function)
     );
   });
 
@@ -64,14 +66,17 @@ describe("get-blogs tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: mockGet,
-    }) as any);
+    vi.mocked(ApiClient).mockImplementation(
+      () =>
+        ({
+          get: mockGet,
+        }) as any
+    );
 
     registerGetBlogs(mockServer, mockEnv);
     const result = await toolHandler({ page: 1, limit: 100 });
 
-    expect(mockGet).toHaveBeenCalledWith("/api/blogs?page=1&limit=100", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/blogs?page=1&limit=100", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
@@ -103,14 +108,17 @@ describe("get-blogs tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: mockGet,
-    }) as any);
+    vi.mocked(ApiClient).mockImplementation(
+      () =>
+        ({
+          get: mockGet,
+        }) as any
+    );
 
     registerGetBlogs(mockServer, mockEnv);
     const result = await toolHandler({ page: 2, limit: 10 });
 
-    expect(mockGet).toHaveBeenCalledWith("/api/blogs?page=2&limit=10", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/blogs?page=2&limit=10", expect.any(Object));
     expect(result).toEqual({
       content: [
         {
@@ -126,14 +134,17 @@ describe("get-blogs tool", () => {
     const mockError = new Error("API request failed: 500 Internal Server Error");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(() => ({
-      get: mockGet,
-    }) as any);
+    vi.mocked(ApiClient).mockImplementation(
+      () =>
+        ({
+          get: mockGet,
+        }) as any
+    );
 
     registerGetBlogs(mockServer, mockEnv);
     const result = await toolHandler({ page: 1, limit: 100 });
 
-    expect(mockGet).toHaveBeenCalledWith("/api/blogs?page=1&limit=100", expect.any(Object));
+    expect(mockGet).toHaveBeenCalledWith("/blogs?page=1&limit=100", expect.any(Object));
     expect(result).toEqual({
       content: [
         {

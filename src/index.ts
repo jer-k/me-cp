@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { McpAgent } from "agents/mcp";
 import { Hono } from "hono";
 
+import packageJson from "../package.json";
 import { registerGetAbout } from "./tools/get-about";
 import { registerGetBlog } from "./tools/get-blog";
 import { registerGetBlogs } from "./tools/get-blogs";
@@ -11,7 +12,7 @@ import { registerGetCvJobs } from "./tools/get-cv-jobs";
 export class MeCP extends McpAgent<Env, Record<string, never>, Record<string, unknown>> {
   server = new McpServer({
     name: "Me-CP",
-    version: "0.0.1",
+    version: packageJson.version,
   });
 
   async init() {
