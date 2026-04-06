@@ -58,11 +58,9 @@ describe("get-cv-jobs tool", () => {
     ];
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetCvJobs(mockServer, mockEnv);
     const result = await toolHandler();
@@ -83,11 +81,9 @@ describe("get-cv-jobs tool", () => {
     const mockError = new Error("API request failed: 403 Forbidden");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetCvJobs(mockServer, mockEnv);
     const result = await toolHandler();

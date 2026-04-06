@@ -55,11 +55,9 @@ describe("get-search-stats-top-pages tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetSearchStatsTopPages(mockServer, mockEnv);
     const result = await toolHandler({ days: 28, limit: 20 });
@@ -83,11 +81,9 @@ describe("get-search-stats-top-pages tool", () => {
     const mockData = { pages: [], days: 7, total: 0 };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetSearchStatsTopPages(mockServer, mockEnv);
     await toolHandler({ days: 7, limit: 5 });
@@ -102,11 +98,9 @@ describe("get-search-stats-top-pages tool", () => {
     const mockError = new Error("API request failed: 500 Internal Server Error");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetSearchStatsTopPages(mockServer, mockEnv);
     const result = await toolHandler({ days: 28, limit: 20 });

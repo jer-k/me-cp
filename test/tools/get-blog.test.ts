@@ -51,11 +51,9 @@ describe("get-blog tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetBlog(mockServer, mockEnv);
     const result = await toolHandler({ slug: "my-blog-post" });
@@ -76,11 +74,9 @@ describe("get-blog tool", () => {
     const mockError = new Error("API request failed: 404 Not Found");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetBlog(mockServer, mockEnv);
     const result = await toolHandler({ slug: "non-existent-post" });

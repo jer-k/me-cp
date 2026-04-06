@@ -64,11 +64,9 @@ describe("get-open-source tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetOpenSource(mockServer, mockEnv);
     const result = await toolHandler({ page: 1, limit: 100 });
@@ -92,11 +90,9 @@ describe("get-open-source tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetOpenSource(mockServer, mockEnv);
     await toolHandler({ page: 2, limit: 10 });
@@ -108,11 +104,9 @@ describe("get-open-source tool", () => {
     const mockError = new Error("API request failed: 500 Internal Server Error");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(
-      function () {
-        return { get: mockGet } as any;
-      }
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetOpenSource(mockServer, mockEnv);
     const result = await toolHandler({ page: 1, limit: 100 });
