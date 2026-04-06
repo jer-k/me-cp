@@ -55,12 +55,9 @@ describe("get-blogs-by-tag tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetBlogsByTag(mockServer, mockEnv);
     const result = await toolHandler({ tag: "typescript" });
@@ -81,12 +78,9 @@ describe("get-blogs-by-tag tool", () => {
     const mockData = { tag: "ruby on rails", posts: [], total: 0 };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetBlogsByTag(mockServer, mockEnv);
     await toolHandler({ tag: "ruby on rails" });
@@ -98,12 +92,9 @@ describe("get-blogs-by-tag tool", () => {
     const mockError = new Error("API request failed: 500 Internal Server Error");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetBlogsByTag(mockServer, mockEnv);
     const result = await toolHandler({ tag: "typescript" });

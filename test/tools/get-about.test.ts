@@ -47,12 +47,9 @@ describe("get-about tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetAbout(mockServer, mockEnv);
     const result = await toolHandler();
@@ -73,12 +70,9 @@ describe("get-about tool", () => {
     const mockError = new Error("API request failed: 500 Internal Server Error");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetAbout(mockServer, mockEnv);
     const result = await toolHandler();

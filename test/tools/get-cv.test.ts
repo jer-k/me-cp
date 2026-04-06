@@ -84,12 +84,9 @@ describe("get-cv tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetCv(mockServer, mockEnv);
     const result = await toolHandler();
@@ -110,12 +107,9 @@ describe("get-cv tool", () => {
     const mockError = new Error("API request failed: 401 Unauthorized");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetCv(mockServer, mockEnv);
     const result = await toolHandler();

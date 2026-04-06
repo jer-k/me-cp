@@ -66,12 +66,9 @@ describe("get-blogs tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetBlogs(mockServer, mockEnv);
     const result = await toolHandler({ page: 1, limit: 100 });
@@ -108,12 +105,9 @@ describe("get-blogs tool", () => {
     };
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetBlogs(mockServer, mockEnv);
     const result = await toolHandler({ page: 2, limit: 10 });
@@ -134,12 +128,9 @@ describe("get-blogs tool", () => {
     const mockError = new Error("API request failed: 500 Internal Server Error");
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
-    vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
-    );
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { get: mockGet } as any;
+    });
 
     registerGetBlogs(mockServer, mockEnv);
     const result = await toolHandler({ page: 1, limit: 100 });
