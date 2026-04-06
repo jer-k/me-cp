@@ -50,10 +50,9 @@ describe("get-social-links tool", () => {
 
     const mockGet = vi.fn().mockResolvedValue(mockData);
     vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
+      function () {
+        return { get: mockGet } as any;
+      }
     );
 
     registerGetSocialLinks(mockServer, mockEnv);
@@ -76,10 +75,9 @@ describe("get-social-links tool", () => {
 
     const mockGet = vi.fn().mockRejectedValue(mockError);
     vi.mocked(ApiClient).mockImplementation(
-      () =>
-        ({
-          get: mockGet,
-        }) as any
+      function () {
+        return { get: mockGet } as any;
+      }
     );
 
     registerGetSocialLinks(mockServer, mockEnv);
