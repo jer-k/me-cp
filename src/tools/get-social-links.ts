@@ -9,6 +9,7 @@ export function registerGetSocialLinks(server: McpServer, env: Env) {
   server.registerTool(
     "get-social-links",
     {
+      title: "Get Social Media Links",
       description:
         "Get Jeremy Kreutzbender's social media links including GitHub, Twitter, and LinkedIn profiles.",
     },

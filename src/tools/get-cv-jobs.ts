@@ -9,6 +9,7 @@ export function registerGetCvJobs(server: McpServer, env: Env) {
   server.registerTool(
     "get-cv-jobs",
     {
+      title: "Get CV Work Experience",
       description:
         "Fetch only the work experience/jobs section from Jeremy Kreutzbender's CV. Returns a list of positions with company names, titles, durations, and detailed descriptions.",
     },

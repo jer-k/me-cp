@@ -9,6 +9,7 @@ export function registerGetCv(server: McpServer, env: Env) {
   server.registerTool(
     "get-cv",
     {
+      title: "Get Full CV/Resume",
       description:
         "Fetch Jeremy Kreutzbender's complete CV/resume including personal info, work experience, projects, skills, and education.",
     },

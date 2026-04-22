@@ -10,6 +10,7 @@ export function registerSearchBlogs(server: McpServer, env: Env) {
   server.registerTool(
     "search-blogs",
     {
+      title: "Search Blog Posts",
       description:
         "Search blog posts on jeremykreutzbender.com by keyword. Searches across titles, descriptions, content, and tags. Returns matching post metadata.",
       inputSchema: {

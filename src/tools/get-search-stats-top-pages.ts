@@ -10,6 +10,7 @@ export function registerGetSearchStatsTopPages(server: McpServer, env: Env) {
   server.registerTool(
     "get-search-stats-top-pages",
     {
+      title: "Get Top Search Pages",
       description:
         "Get the top performing pages on jeremykreutzbender.com from Google Search Console, ranked by clicks. Includes clicks, impressions, CTR, and average position per page.",
       inputSchema: {

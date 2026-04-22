@@ -31,9 +31,10 @@ describe("get-cv-jobs tool", () => {
 
     expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-cv-jobs",
-      {
+      expect.objectContaining({
+        title: "Get CV Work Experience",
         description: expect.stringContaining("Fetch only the work experience/jobs section"),
-      },
+      }),
       expect.any(Function)
     );
   });

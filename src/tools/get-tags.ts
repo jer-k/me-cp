@@ -9,6 +9,7 @@ export function registerGetTags(server: McpServer, env: Env) {
   server.registerTool(
     "get-tags",
     {
+      title: "Get Blog Post Tags",
       description:
         "Get all unique blog post tags from jeremykreutzbender.com. Returns a sorted list of tags and the total count.",
     },

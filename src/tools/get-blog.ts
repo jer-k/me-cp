@@ -10,6 +10,7 @@ export function registerGetBlog(server: McpServer, env: Env) {
   server.registerTool(
     "get-blog",
     {
+      title: "Get Blog Post by Slug",
       description:
         "Fetch a single blog post by its slug from jeremykreutzbender.com. Returns the full blog post including content in markdown format.",
       inputSchema: {

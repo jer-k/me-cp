@@ -32,6 +32,7 @@ describe("get-open-source tool", () => {
     expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-open-source",
       expect.objectContaining({
+        title: "Get Open Source Contributions",
         description: expect.stringContaining("open source pull requests"),
         inputSchema: expect.any(Object),
       }),

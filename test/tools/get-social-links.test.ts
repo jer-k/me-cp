@@ -32,6 +32,7 @@ describe("get-social-links tool", () => {
     expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-social-links",
       expect.objectContaining({
+        title: "Get Social Media Links",
         description: expect.stringContaining("social media links"),
       }),
       expect.any(Function)

@@ -9,6 +9,7 @@ export function registerGetAbout(server: McpServer, env: Env) {
   server.registerTool(
     "get-about",
     {
+      title: "Get About Information",
       description:
         "Get personal information about Jeremy Kreutzbender including name, email, and website.",
     },

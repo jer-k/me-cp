@@ -10,6 +10,7 @@ export function registerGetBlogs(server: McpServer, env: Env) {
   server.registerTool(
     "get-blogs",
     {
+      title: "Get Blog Posts List",
       description:
         "Fetch a paginated list of blog posts from jeremykreutzbender.com. Returns post metadata including title, slug, date, tags, and description but not full content.",
       inputSchema: {

@@ -32,6 +32,7 @@ describe("get-tags tool", () => {
     expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-tags",
       expect.objectContaining({
+        title: "Get Blog Post Tags",
         description: expect.stringContaining("unique blog post tags"),
       }),
       expect.any(Function)

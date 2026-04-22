@@ -31,10 +31,11 @@ describe("get-about tool", () => {
 
     expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-about",
-      {
+      expect.objectContaining({
+        title: "Get About Information",
         description:
           "Get personal information about Jeremy Kreutzbender including name, email, and website.",
-      },
+      }),
       expect.any(Function)
     );
   });

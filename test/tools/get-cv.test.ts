@@ -31,9 +31,10 @@ describe("get-cv tool", () => {
 
     expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-cv",
-      {
+      expect.objectContaining({
+        title: "Get Full CV/Resume",
         description: expect.stringContaining("Fetch Jeremy Kreutzbender's complete CV/resume"),
-      },
+      }),
       expect.any(Function)
     );
   });

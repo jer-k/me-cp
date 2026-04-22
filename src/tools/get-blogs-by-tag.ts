@@ -10,6 +10,7 @@ export function registerGetBlogsByTag(server: McpServer, env: Env) {
   server.registerTool(
     "get-blogs-by-tag",
     {
+      title: "Get Blog Posts by Tag",
       description:
         "Fetch blog posts filtered by a specific tag from jeremykreutzbender.com. Returns post metadata for all posts matching the given tag.",
       inputSchema: {

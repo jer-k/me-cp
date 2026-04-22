@@ -10,6 +10,7 @@ export function registerGetSearchStatsTopQueries(server: McpServer, env: Env) {
   server.registerTool(
     "get-search-stats-top-queries",
     {
+      title: "Get Top Search Queries",
       description:
         "Get the top search queries driving traffic to jeremykreutzbender.com from Google Search Console. Includes clicks, impressions, CTR, and average position per query.",
       inputSchema: {

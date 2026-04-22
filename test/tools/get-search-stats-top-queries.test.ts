@@ -32,6 +32,7 @@ describe("get-search-stats-top-queries tool", () => {
     expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-search-stats-top-queries",
       expect.objectContaining({
+        title: "Get Top Search Queries",
         description: expect.stringContaining("top search queries"),
         inputSchema: expect.any(Object),
       }),

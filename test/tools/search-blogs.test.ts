@@ -32,6 +32,7 @@ describe("search-blogs tool", () => {
     expect(mockServer.registerTool).toHaveBeenCalledWith(
       "search-blogs",
       expect.objectContaining({
+        title: "Search Blog Posts",
         description: expect.stringContaining("Search blog posts"),
         inputSchema: expect.any(Object),
       }),

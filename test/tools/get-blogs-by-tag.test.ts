@@ -32,6 +32,7 @@ describe("get-blogs-by-tag tool", () => {
     expect(mockServer.registerTool).toHaveBeenCalledWith(
       "get-blogs-by-tag",
       expect.objectContaining({
+        title: "Get Blog Posts by Tag",
         description: expect.stringContaining("filtered by a specific tag"),
         inputSchema: expect.any(Object),
       }),

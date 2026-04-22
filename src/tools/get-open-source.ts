@@ -10,6 +10,7 @@ export function registerGetOpenSource(server: McpServer, env: Env) {
   server.registerTool(
     "get-open-source",
     {
+      title: "Get Open Source Contributions",
       description:
         "Fetch a paginated list of Jeremy Kreutzbender's open source pull requests. Returns PR metadata including title, repository, and permalink.",
       inputSchema: {

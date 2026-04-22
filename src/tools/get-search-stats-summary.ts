@@ -10,6 +10,7 @@ export function registerGetSearchStatsSummary(server: McpServer, env: Env) {
   server.registerTool(
     "get-search-stats-summary",
     {
+      title: "Get Search Stats Summary",
       description:
         "Get a summary of Google Search Console statistics for jeremykreutzbender.com including total clicks, impressions, average CTR, and average position.",
       inputSchema: {
