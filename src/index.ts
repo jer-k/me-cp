@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { CfWorkerJsonSchemaValidator } from "@modelcontextprotocol/sdk/validation/cfworker";
 import { McpAgent } from "agents/mcp";
 import { Hono } from "hono";
 
@@ -16,12 +17,18 @@ import { registerGetSearchStatsTopQueries } from "./tools/get-search-stats-top-q
 import { registerGetSocialLinks } from "./tools/get-social-links";
 import { registerGetTags } from "./tools/get-tags";
 import { registerSearchBlogs } from "./tools/search-blogs";
+import { registerSendContactEmail } from "./tools/send-contact-email";
 
 export class MeCP extends McpAgent<Env, Record<string, never>, Record<string, unknown>> {
-  server = new McpServer({
-    name: "Me-CP",
-    version: packageJson.version,
-  });
+  server = new McpServer(
+    {
+      name: "Me-CP",
+      version: packageJson.version,
+    },
+    {
+      jsonSchemaValidator: new CfWorkerJsonSchemaValidator(),
+    }
+  );
 
   async init() {
     registerGetAbout(this.server, this.env);
@@ -37,6 +44,7 @@ export class MeCP extends McpAgent<Env, Record<string, never>, Record<string, un
     registerGetSearchStatsTopQueries(this.server, this.env);
     registerGetSocialLinks(this.server, this.env);
     registerGetTags(this.server, this.env);
+    registerSendContactEmail(this.server, this.env);
   }
 }
 

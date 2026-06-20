@@ -19,6 +19,7 @@ will ever use this, but I built it as fun little project to gather data from my 
 - **get-search-stats-summary** — Get a Google Search Console summary with total clicks, impressions, average CTR, and position
 - **get-search-stats-top-pages** — Get the top performing pages ranked by clicks from Google Search Console
 - **get-search-stats-top-queries** — Get the top search queries driving traffic from Google Search Console
+- **send-contact-email** — Send a contact email, requiring MCP elicitation unless the connection opts out with an HTTP header
 
 ## Development
 
@@ -37,6 +38,42 @@ npm run dev
 - `npm test` — Run tests with Vitest
 
 ### Installing the MCP
+
+#### Codex
+
+Add this to `.codex/config.toml` in this repo or to `~/.codex/config.toml`:
+
+```toml
+[mcp_servers.me-cp]
+url = "http://localhost:8787/mcp"
+http_headers = { "X-Me-CP-Require-Elicitation" = "true" }
+```
+
+Start the local server before opening a new Codex thread:
+
+```bash
+npm run dev
+```
+
+#### Cloudflare Agents
+
+Configure whether the MCP connection requires elicitation through the Streamable HTTP transport:
+
+```ts
+await this.mcpManager.connect(this.config.url, {
+  reconnect: { id: this.id },
+  transport: {
+    ...this.config.transport,
+    requestInit: {
+      headers: {
+        "X-Me-CP-Require-Elicitation": "false",
+      },
+    },
+  },
+});
+```
+
+Elicitation is required when the header is omitted. Only an explicit value of `false` disables it.
 
 #### Claude Desktop
 
