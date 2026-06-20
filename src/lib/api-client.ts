@@ -28,4 +28,30 @@ export class ApiClient {
     const validated = schema.parse(data);
     return validated;
   }
+
+  async post<TRequest, TResponse>(
+    endpoint: string,
+    body: TRequest,
+    schema: z.ZodType<TResponse>
+  ): Promise<TResponse> {
+    const url = `${this.baseUrl}${endpoint}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${this.apiKey}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    const validated = schema.parse(data);
+    return validated;
+  }
 }
