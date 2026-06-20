@@ -4,6 +4,19 @@ import { z } from "zod";
 import { ApiClient } from "../lib/api-client";
 import { ContactRequestSchema, ContactResponseSchema } from "../schemas/contact";
 
+const REQUIRE_ELICITATION_HEADER = "x-me-cp-require-elicitation";
+
+function shouldRequireElicitation(
+  headers: Record<string, string | string[] | undefined> | undefined
+) {
+  const header = Object.entries(headers ?? {}).find(
+    ([name]) => name.toLowerCase() === REQUIRE_ELICITATION_HEADER
+  )?.[1];
+  const value = Array.isArray(header) ? header[0] : header;
+
+  return value?.trim().toLowerCase() !== "false";
+}
+
 export function registerSendContactEmail(server: McpServer, env: Env) {
   const client = new ApiClient(env.API_BASE_URL, env.API_SECRET_KEY);
 
@@ -27,36 +40,39 @@ export function registerSendContactEmail(server: McpServer, env: Env) {
         openWorldHint: true,
       },
     },
-    async ({ fullName, emailAddress, message }) => {
+    async ({ fullName, emailAddress, message }, extra) => {
       const payload = ContactRequestSchema.parse({ fullName, emailAddress, message });
+      const requireElicitation = shouldRequireElicitation(extra?.requestInfo?.headers);
 
       try {
-        const confirmation = await server.server.elicitInput({
-          mode: "form",
-          message: `Send this contact email from ${payload.fullName} <${payload.emailAddress}>?\n\n${payload.message}`,
-          requestedSchema: {
-            type: "object",
-            properties: {
-              confirmSend: {
-                type: "boolean",
-                title: "Send email",
-                description: "Confirm that this contact email should be sent.",
-                default: false,
+        if (requireElicitation) {
+          const confirmation = await server.server.elicitInput({
+            mode: "form",
+            message: `Send this contact email from ${payload.fullName} <${payload.emailAddress}>?\n\n${payload.message}`,
+            requestedSchema: {
+              type: "object",
+              properties: {
+                confirmSend: {
+                  type: "boolean",
+                  title: "Send email",
+                  description: "Confirm that this contact email should be sent.",
+                  default: false,
+                },
               },
+              required: ["confirmSend"],
             },
-            required: ["confirmSend"],
-          },
-        });
+          });
 
-        if (confirmation.action !== "accept" || confirmation.content?.confirmSend !== true) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: "Contact email was not sent.",
-              },
-            ],
-          };
+          if (confirmation.action !== "accept" || confirmation.content?.confirmSend !== true) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: "Contact email was not sent.",
+                },
+              ],
+            };
+          }
         }
 
         const data = await client.post("/contact", payload, ContactResponseSchema);

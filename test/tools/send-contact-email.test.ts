@@ -16,6 +16,15 @@ describe("send-contact-email tool", () => {
     message: "Hello from the MCP tool.",
   };
 
+  const requestExtra = (requireElicitation?: string) => ({
+    requestInfo: {
+      headers:
+        requireElicitation === undefined
+          ? {}
+          : { "X-Me-CP-Require-Elicitation": requireElicitation },
+    },
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -94,6 +103,41 @@ describe("send-contact-email tool", () => {
         },
       ],
     });
+  });
+
+  it("should send without elicitation when the connection header opts out", async () => {
+    const mockPost = vi.fn().mockResolvedValue({ success: true });
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { post: mockPost } as any;
+    });
+
+    registerSendContactEmail(mockServer, mockEnv);
+    const result = await toolHandler(payload, requestExtra("false"));
+
+    expect(mockElicitInput).not.toHaveBeenCalled();
+    expect(mockPost).toHaveBeenCalledWith("/contact", payload, expect.any(Object));
+    expect(result).toEqual({
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({ success: true }, null, 2),
+          mimeType: "application/json",
+        },
+      ],
+    });
+  });
+
+  it("should require elicitation when the connection header is true", async () => {
+    const mockPost = vi.fn().mockResolvedValue({ success: true });
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { post: mockPost } as any;
+    });
+
+    registerSendContactEmail(mockServer, mockEnv);
+    await toolHandler(payload, requestExtra("true"));
+
+    expect(mockElicitInput).toHaveBeenCalledOnce();
+    expect(mockPost).toHaveBeenCalledWith("/contact", payload, expect.any(Object));
   });
 
   it("should not send the contact email when confirmation is declined", async () => {
