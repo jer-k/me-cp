@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { CfWorkerJsonSchemaValidator } from "@modelcontextprotocol/sdk/validation/cfworker";
 import { McpAgent } from "agents/mcp";
-import { Hono } from "hono";
 
 import packageJson from "../package.json";
 import { registerGetAbout } from "./tools/get-about";
@@ -48,10 +47,4 @@ export class MeCP extends McpAgent<Env, Record<string, never>, Record<string, un
   }
 }
 
-const app = new Hono<{ Bindings: Env }>();
-
-app.all("/mcp", (c) => MeCP.serve("/mcp").fetch(c.req.raw, c.env, c.executionCtx));
-
-app.notFound((c) => c.text("Not found", 404));
-
-export default app;
+export default MeCP.serve("/mcp");
