@@ -6,10 +6,11 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "format": "biome format --write",
+    "lint": "biome check",
     "lint:fix": "biome lint --fix",
     "start": "wrangler dev",
     "cf-typegen": "wrangler types",
-    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "test": "vitest"
   },
   "dependencies": {
