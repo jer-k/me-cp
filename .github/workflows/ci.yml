@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches-ignore:
+    branches:
       - main
   pull_request:
     branches:
@@ -10,26 +10,24 @@ on:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.3.0
         with:
-          node-version: 22
-          cache: npm
+          node-version: "22"
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm install
 
-      - name: Lint
-        run: npx biome lint
-
-      - name: Format check
-        run: npx biome format
+      - name: Check Biome
+        run: npm run lint
 
       - name: Type check
-        run: npm run type-check
+        run: npm run typecheck
 
       - name: Test
         run: npm test

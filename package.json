@@ -6,17 +6,17 @@
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
     "format": "biome format --write",
+    "lint": "biome check",
     "lint:fix": "biome lint --fix",
     "start": "wrangler dev",
     "cf-typegen": "wrangler types",
-    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "test": "vitest"
   },
   "dependencies": {
     "@cfworker/json-schema": "^4.1.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "agents": "^0.12.3",
-    "hono": "^4.12.23",
+    "agents": "^0.16.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
@@ -24,6 +24,6 @@
     "@types/node": "^25.6.0",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8",
-    "wrangler": "^4.85.0"
+    "wrangler": "^4.103.0"
   }
 }
