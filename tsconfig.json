@@ -13,7 +13,6 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "es2021",
-    "types": ["@cloudflare/workers-types/2023-07-01"]
   },
   "include": ["worker-configuration.d.ts", "src/**/*.ts"],
   "exclude": ["node_modules"]
