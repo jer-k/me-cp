@@ -1,20 +1,22 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import {
+  acceptedContent,
+  inputRequired,
+  inputResponse,
+  type McpServer,
+} from "@modelcontextprotocol/server";
 import { z } from "zod";
 
 import { ApiClient } from "../lib/api-client";
 import { ContactRequestSchema, ContactResponseSchema } from "../schemas/contact";
 
 const REQUIRE_ELICITATION_HEADER = "x-me-cp-require-elicitation";
+const CONFIRM_SEND_INPUT_KEY = "confirm-send";
+const ConfirmSendSchema = z.object({
+  confirmSend: z.boolean().describe("Confirm that this contact email should be sent."),
+});
 
-function shouldRequireElicitation(
-  headers: Record<string, string | string[] | undefined> | undefined
-) {
-  const header = Object.entries(headers ?? {}).find(
-    ([name]) => name.toLowerCase() === REQUIRE_ELICITATION_HEADER
-  )?.[1];
-  const value = Array.isArray(header) ? header[0] : header;
-
-  return value?.trim().toLowerCase() !== "false";
+function shouldRequireElicitation(headers: Headers | undefined) {
+  return headers?.get(REQUIRE_ELICITATION_HEADER)?.trim().toLowerCase() !== "false";
 }
 
 export function registerSendContactEmail(server: McpServer, env: Env) {
@@ -40,30 +42,43 @@ export function registerSendContactEmail(server: McpServer, env: Env) {
         openWorldHint: true,
       },
     },
-    async ({ fullName, emailAddress, message }, extra) => {
+    async ({ fullName, emailAddress, message }, context) => {
       const payload = ContactRequestSchema.parse({ fullName, emailAddress, message });
-      const requireElicitation = shouldRequireElicitation(extra?.requestInfo?.headers);
+      const requireElicitation = shouldRequireElicitation(context.http?.req?.headers);
 
       try {
         if (requireElicitation) {
-          const confirmation = await server.server.elicitInput({
-            mode: "form",
-            message: `Send this contact email from ${payload.fullName} <${payload.emailAddress}>?\n\n${payload.message}`,
-            requestedSchema: {
-              type: "object",
-              properties: {
-                confirmSend: {
-                  type: "boolean",
-                  title: "Send email",
-                  description: "Confirm that this contact email should be sent.",
-                  default: false,
-                },
-              },
-              required: ["confirmSend"],
-            },
-          });
+          const response = inputResponse(context.mcpReq.inputResponses, CONFIRM_SEND_INPUT_KEY);
 
-          if (confirmation.action !== "accept" || confirmation.content?.confirmSend !== true) {
+          if (response.kind === "missing") {
+            return inputRequired({
+              inputRequests: {
+                [CONFIRM_SEND_INPUT_KEY]: inputRequired.elicit({
+                  message: `Send this contact email from ${payload.fullName} <${payload.emailAddress}>?\n\n${payload.message}`,
+                  requestedSchema: {
+                    type: "object",
+                    properties: {
+                      confirmSend: {
+                        type: "boolean",
+                        title: "Send email",
+                        description: "Confirm that this contact email should be sent.",
+                        default: false,
+                      },
+                    },
+                    required: ["confirmSend"],
+                  },
+                }),
+              },
+            });
+          }
+
+          const confirmation = acceptedContent(
+            context.mcpReq.inputResponses,
+            CONFIRM_SEND_INPUT_KEY,
+            ConfirmSendSchema
+          );
+
+          if (confirmation?.confirmSend !== true) {
             return {
               content: [
                 {
