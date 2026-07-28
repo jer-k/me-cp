@@ -8,7 +8,6 @@ describe("send-contact-email tool", () => {
   let mockServer: any;
   let mockEnv: any;
   let toolHandler: any;
-  let mockElicitInput: any;
 
   const payload = {
     fullName: "Ada Lovelace",
@@ -16,12 +15,28 @@ describe("send-contact-email tool", () => {
     message: "Hello from the MCP tool.",
   };
 
-  const requestExtra = (requireElicitation?: string) => ({
-    requestInfo: {
-      headers:
-        requireElicitation === undefined
-          ? {}
-          : { "X-Me-CP-Require-Elicitation": requireElicitation },
+  const requestContext = ({
+    requireElicitation,
+    response,
+  }: {
+    requireElicitation?: string;
+    response?: Record<string, unknown>;
+  } = {}) => ({
+    http: {
+      req: new Request("https://example.com/mcp", {
+        headers:
+          requireElicitation === undefined
+            ? undefined
+            : { "X-Me-CP-Require-Elicitation": requireElicitation },
+      }),
+    },
+    mcpReq: {
+      inputResponses:
+        response === undefined
+          ? undefined
+          : {
+              "confirm-send": response,
+            },
     },
   });
 
@@ -34,15 +49,8 @@ describe("send-contact-email tool", () => {
     };
 
     toolHandler = vi.fn();
-    mockElicitInput = vi.fn().mockResolvedValue({
-      action: "accept",
-      content: { confirmSend: true },
-    });
 
     mockServer = {
-      server: {
-        elicitInput: mockElicitInput,
-      },
       registerTool: vi.fn((_name: string, _config: any, handler: any) => {
         toolHandler = handler;
       }),
@@ -68,31 +76,59 @@ describe("send-contact-email tool", () => {
     );
   });
 
-  it("should elicit confirmation and send the contact email when confirmed", async () => {
+  it("should request confirmation before sending the contact email", async () => {
+    const mockPost = vi.fn();
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { post: mockPost } as any;
+    });
+
+    registerSendContactEmail(mockServer, mockEnv);
+    const result = await toolHandler(payload, requestContext());
+
+    expect(mockPost).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      resultType: "input_required",
+      inputRequests: {
+        "confirm-send": {
+          method: "elicitation/create",
+          params: {
+            message: expect.stringContaining("Send this contact email from Ada Lovelace"),
+            requestedSchema: {
+              type: "object",
+              properties: {
+                confirmSend: {
+                  type: "boolean",
+                  title: "Send email",
+                  description: "Confirm that this contact email should be sent.",
+                  default: false,
+                },
+              },
+              required: ["confirmSend"],
+            },
+            mode: "form",
+          },
+        },
+      },
+    });
+  });
+
+  it("should send the contact email when confirmation is accepted", async () => {
     const mockPost = vi.fn().mockResolvedValue({ success: true });
     vi.mocked(ApiClient).mockImplementation(function () {
       return { post: mockPost } as any;
     });
 
     registerSendContactEmail(mockServer, mockEnv);
-    const result = await toolHandler(payload);
-
-    expect(mockElicitInput).toHaveBeenCalledWith({
-      mode: "form",
-      message: expect.stringContaining("Send this contact email from Ada Lovelace"),
-      requestedSchema: {
-        type: "object",
-        properties: {
-          confirmSend: {
-            type: "boolean",
-            title: "Send email",
-            description: "Confirm that this contact email should be sent.",
-            default: false,
-          },
+    const result = await toolHandler(
+      payload,
+      requestContext({
+        response: {
+          action: "accept",
+          content: { confirmSend: true },
         },
-        required: ["confirmSend"],
-      },
-    });
+      })
+    );
+
     expect(mockPost).toHaveBeenCalledWith("/contact", payload, expect.any(Object));
     expect(result).toEqual({
       content: [
@@ -112,9 +148,8 @@ describe("send-contact-email tool", () => {
     });
 
     registerSendContactEmail(mockServer, mockEnv);
-    const result = await toolHandler(payload, requestExtra("false"));
+    const result = await toolHandler(payload, requestContext({ requireElicitation: "false" }));
 
-    expect(mockElicitInput).not.toHaveBeenCalled();
     expect(mockPost).toHaveBeenCalledWith("/contact", payload, expect.any(Object));
     expect(result).toEqual({
       content: [
@@ -128,27 +163,30 @@ describe("send-contact-email tool", () => {
   });
 
   it("should require elicitation when the connection header is true", async () => {
-    const mockPost = vi.fn().mockResolvedValue({ success: true });
-    vi.mocked(ApiClient).mockImplementation(function () {
-      return { post: mockPost } as any;
-    });
-
-    registerSendContactEmail(mockServer, mockEnv);
-    await toolHandler(payload, requestExtra("true"));
-
-    expect(mockElicitInput).toHaveBeenCalledOnce();
-    expect(mockPost).toHaveBeenCalledWith("/contact", payload, expect.any(Object));
-  });
-
-  it("should not send the contact email when confirmation is declined", async () => {
-    mockElicitInput.mockResolvedValue({ action: "decline" });
     const mockPost = vi.fn();
     vi.mocked(ApiClient).mockImplementation(function () {
       return { post: mockPost } as any;
     });
 
     registerSendContactEmail(mockServer, mockEnv);
-    const result = await toolHandler(payload);
+    const result = await toolHandler(payload, requestContext({ requireElicitation: "true" }));
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        resultType: "input_required",
+      })
+    );
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it("should not send the contact email when confirmation is declined", async () => {
+    const mockPost = vi.fn();
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { post: mockPost } as any;
+    });
+
+    registerSendContactEmail(mockServer, mockEnv);
+    const result = await toolHandler(payload, requestContext({ response: { action: "decline" } }));
 
     expect(mockPost).not.toHaveBeenCalled();
     expect(result).toEqual({
@@ -162,14 +200,13 @@ describe("send-contact-email tool", () => {
   });
 
   it("should not send the contact email when confirmation is canceled", async () => {
-    mockElicitInput.mockResolvedValue({ action: "cancel" });
     const mockPost = vi.fn();
     vi.mocked(ApiClient).mockImplementation(function () {
       return { post: mockPost } as any;
     });
 
     registerSendContactEmail(mockServer, mockEnv);
-    const result = await toolHandler(payload);
+    const result = await toolHandler(payload, requestContext({ response: { action: "cancel" } }));
 
     expect(mockPost).not.toHaveBeenCalled();
     expect(result).toEqual({
@@ -183,17 +220,21 @@ describe("send-contact-email tool", () => {
   });
 
   it("should not send the contact email when confirmSend is false", async () => {
-    mockElicitInput.mockResolvedValue({
-      action: "accept",
-      content: { confirmSend: false },
-    });
     const mockPost = vi.fn();
     vi.mocked(ApiClient).mockImplementation(function () {
       return { post: mockPost } as any;
     });
 
     registerSendContactEmail(mockServer, mockEnv);
-    const result = await toolHandler(payload);
+    const result = await toolHandler(
+      payload,
+      requestContext({
+        response: {
+          action: "accept",
+          content: { confirmSend: false },
+        },
+      })
+    );
 
     expect(mockPost).not.toHaveBeenCalled();
     expect(result).toEqual({
@@ -206,20 +247,31 @@ describe("send-contact-email tool", () => {
     });
   });
 
-  it("should return error response when elicitation is not supported", async () => {
-    mockElicitInput.mockRejectedValue(new Error("Client does not support form elicitation."));
+  it("should not send the contact email when confirmation content is invalid", async () => {
+    const mockPost = vi.fn();
+    vi.mocked(ApiClient).mockImplementation(function () {
+      return { post: mockPost } as any;
+    });
 
     registerSendContactEmail(mockServer, mockEnv);
-    const result = await toolHandler(payload);
+    const result = await toolHandler(
+      payload,
+      requestContext({
+        response: {
+          action: "accept",
+          content: { confirmSend: "yes" },
+        },
+      })
+    );
 
+    expect(mockPost).not.toHaveBeenCalled();
     expect(result).toEqual({
       content: [
         {
           type: "text",
-          text: "Error sending contact email: Client does not support form elicitation.",
+          text: "Contact email was not sent.",
         },
       ],
-      isError: true,
     });
   });
 
@@ -230,7 +282,15 @@ describe("send-contact-email tool", () => {
     });
 
     registerSendContactEmail(mockServer, mockEnv);
-    const result = await toolHandler(payload);
+    const result = await toolHandler(
+      payload,
+      requestContext({
+        response: {
+          action: "accept",
+          content: { confirmSend: true },
+        },
+      })
+    );
 
     expect(result).toEqual({
       content: [

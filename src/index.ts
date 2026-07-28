@@ -1,6 +1,5 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { CfWorkerJsonSchemaValidator } from "@modelcontextprotocol/sdk/validation/cfworker";
-import { McpAgent } from "agents/mcp";
+import { McpServer } from "@modelcontextprotocol/server";
+import { createMcpHandler } from "agents/mcp/server";
 
 import packageJson from "../package.json";
 import { registerGetAbout } from "./tools/get-about";
@@ -18,33 +17,35 @@ import { registerGetTags } from "./tools/get-tags";
 import { registerSearchBlogs } from "./tools/search-blogs";
 import { registerSendContactEmail } from "./tools/send-contact-email";
 
-export class MeCP extends McpAgent<Env, Record<string, never>, Record<string, unknown>> {
-  server = new McpServer(
-    {
-      name: "Me-CP",
-      version: packageJson.version,
-    },
-    {
-      jsonSchemaValidator: new CfWorkerJsonSchemaValidator(),
-    }
-  );
+function createServer(env: Env) {
+  const server = new McpServer({
+    name: "Me-CP",
+    version: packageJson.version,
+  });
 
-  async init() {
-    registerGetAbout(this.server, this.env);
-    registerGetBlogs(this.server, this.env);
-    registerGetBlog(this.server, this.env);
-    registerGetBlogsByTag(this.server, this.env);
-    registerSearchBlogs(this.server, this.env);
-    registerGetCv(this.server, this.env);
-    registerGetCvJobs(this.server, this.env);
-    registerGetOpenSource(this.server, this.env);
-    registerGetSearchStatsSummary(this.server, this.env);
-    registerGetSearchStatsTopPages(this.server, this.env);
-    registerGetSearchStatsTopQueries(this.server, this.env);
-    registerGetSocialLinks(this.server, this.env);
-    registerGetTags(this.server, this.env);
-    registerSendContactEmail(this.server, this.env);
-  }
+  registerGetAbout(server, env);
+  registerGetBlogs(server, env);
+  registerGetBlog(server, env);
+  registerGetBlogsByTag(server, env);
+  registerSearchBlogs(server, env);
+  registerGetCv(server, env);
+  registerGetCvJobs(server, env);
+  registerGetOpenSource(server, env);
+  registerGetSearchStatsSummary(server, env);
+  registerGetSearchStatsTopPages(server, env);
+  registerGetSearchStatsTopQueries(server, env);
+  registerGetSocialLinks(server, env);
+  registerGetTags(server, env);
+  registerSendContactEmail(server, env);
+
+  return server;
 }
 
-export default MeCP.serve("/mcp");
+export default {
+  fetch(request, env, ctx) {
+    return createMcpHandler(() => createServer(env), {
+      legacy: "reject",
+      route: "/mcp",
+    })(request, env, ctx);
+  },
+} satisfies ExportedHandler<Env>;

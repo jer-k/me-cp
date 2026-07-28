@@ -4,6 +4,8 @@ This is an MCP server with tools and resources to get information about me! It i
 will ever use this, but I built it as fun little project to gather data from my personal website
 [jeremykreutzbender.com](https://jeremykreutzbender.com).
 
+The server uses the stateless MCP `2026-07-28` protocol through Cloudflare's MCP handler.
+
 ## Tools
 
 - **get-about** — Get personal information including name, email, and website
@@ -19,7 +21,8 @@ will ever use this, but I built it as fun little project to gather data from my 
 - **get-search-stats-summary** — Get a Google Search Console summary with total clicks, impressions, average CTR, and position
 - **get-search-stats-top-pages** — Get the top performing pages ranked by clicks from Google Search Console
 - **get-search-stats-top-queries** — Get the top search queries driving traffic from Google Search Console
-- **send-contact-email** — Send a contact email, requiring MCP elicitation unless the connection opts out with an HTTP header
+- **send-contact-email** — Send a contact email, requiring stateless MCP form elicitation unless the
+  request opts out with an HTTP header
 
 ## Development
 
@@ -57,7 +60,7 @@ npm run dev
 
 #### Cloudflare Agents
 
-Configure whether the MCP connection requires elicitation through the Streamable HTTP transport:
+Configure whether each MCP request requires elicitation through the Streamable HTTP transport:
 
 ```ts
 await this.mcpManager.connect(this.config.url, {
